@@ -1,5 +1,3 @@
-
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -30,8 +28,6 @@ namespace GradeBook
         string Name {get;}
         event GradeAddedDelegate GradeAdded;
     }
-
-
     public abstract class Book : NamedObject, IBook
     {
         public Book(string name) : base(name)
@@ -71,7 +67,23 @@ namespace GradeBook
 
         public override Statistics GetStattistics()
         {
-            throw new NotImplementedException();
+            var stat = new Statistics();
+            using(var data = File.OpenText($"{Name}.txt"))
+            {
+                var line = data.ReadLine();
+                while (line!= null)
+                {
+                    var number = double.Parse(line);
+                    stat.Add(number);
+                    line = data.ReadLine();
+                }
+            }
+
+            //var grades = Convert.ToDouble(sgrades);
+
+
+            return stat;
+
         }
     }
     public class InMemoryBook : Book
@@ -129,55 +141,17 @@ namespace GradeBook
         public override Statistics GetStattistics()
         {
             var stat = new Statistics();
-/*             result.Average = 0.0;
-            result.High=   double.MinValue;
-            result.Low    =   double.MaxValue; */
-            double sumOfGrades = 0;
+
 
             for(var index = 0; index < grades.Count; index += 1)
             {
-
-                //result.High = Math.Max(grades[index], result.High);
-                stat.GetHighest(grades[index]);
-                //result.Low= Math.Min(grades[index], result.Low);
-                stat.GetLowest(grades[index]);
-                //stat.Average += grades[index];
-                sumOfGrades += grades[index];
+                stat.Add(grades[index]);
             } 
 
-            stat.CalculateAverage(sumOfGrades, grades.Count);
-            stat.GetLetter(stat.Average);
-            //result.Average /= grades.Count;
-/*             switch (stat.Average)
-            {
-                case var d when  d >= 90.0:
-                    stat.Letter = 'A';
-                    break;
 
-                case var d when  d >= 80.0:
-                    stat.Letter = 'B';
-                    break;
-
-                case var d when  d >= 70.0:
-                    stat.Letter = 'C';
-                    break;
-
-                case var d when  d >= 60.0:
-                    stat.Letter = 'D';
-                    break;
-
-                default:
-                    stat.Letter = 'F';
-                    break;
-            } */
             return stat;
         }
         private List<double> grades;
-
-
         public const string CATEGORY = "Science";
-
-
-
     }
 }
